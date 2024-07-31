@@ -17,7 +17,7 @@
   "module": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
   "bin": {
-    "vmini": "./dist/bin/index.js"
+    "vmini": "./dist/cli/index.js"
   },
   "files": [
     "dist"

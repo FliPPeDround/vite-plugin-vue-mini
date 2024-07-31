@@ -8,7 +8,7 @@ export default defineConfig({
   dts: true,
   entry: [
     'src/index.ts',
-    'bin/index.ts',
+    'cli/index.ts',
   ],
   external: [
     ...Object.keys(peerDependencies),
