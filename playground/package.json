@@ -1,0 +1,16 @@
+{
+  "name": "playground",
+  "version": "1.0.0",
+  "description": "",
+  "author": "",
+  "license": "ISC",
+  "keywords": [],
+  "main": "index.js",
+  "scripts": {
+    "dev": "vmini dev",
+    "build": "vmini build"
+  },
+  "devDependencies": {
+    "vite-plugin-vue-mini": "workspace:*"
+  }
+}
