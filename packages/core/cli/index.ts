@@ -12,6 +12,10 @@ cli
 
 cli
   .command('dev')
-  .action(() => buildCommand('watch'))
+  .action(() => buildCommand('development'))
+
+cli
+  .command('build')
+  .action(() => buildCommand('production'))
 
 cli.parse()

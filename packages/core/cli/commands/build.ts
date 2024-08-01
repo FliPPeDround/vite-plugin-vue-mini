@@ -6,7 +6,7 @@ export async function buildCommand(mode: string) {
       'process.env.NODE_ENV': JSON.stringify(mode),
     },
     build: {
-      watch: mode === 'watch' ? {} : null,
+      watch: mode === 'development' ? {} : null,
       rollupOptions: {
         output: {
           format: 'cjs',
