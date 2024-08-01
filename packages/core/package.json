@@ -31,6 +31,9 @@
     "vite": "^5.3.5"
   },
   "devDependencies": {
-    "cac": "^6.7.14"
+    "@rollup/plugin-json": "^6.1.0",
+    "@types/fs-extra": "^11.0.4",
+    "cac": "^6.7.14",
+    "fs-extra": "^11.2.0"
   }
 }
