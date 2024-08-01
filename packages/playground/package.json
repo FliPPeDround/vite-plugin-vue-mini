@@ -11,7 +11,8 @@
     "build": "vmini build"
   },
   "dependencies": {
-    "@vue-mini/core": "^1.0.2"
+    "@vue-mini/core": "^1.0.2",
+    "less": "^4.2.0"
   },
   "devDependencies": {
     "vite-plugin-vue-mini": "workspace:*"

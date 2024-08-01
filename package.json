@@ -31,7 +31,8 @@
   ],
   "scripts": {
     "build": "unbuild",
-    "dev": "unbuild --stub",
+    "dev": "cd packages/core && pnpm dev",
+    "play": "cd packages/playground && pnpm dev",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "prepublishOnly": "nr build",

@@ -7,6 +7,12 @@ export async function buildCommand(mode: string) {
     },
     build: {
       watch: mode === 'watch' ? {} : null,
+      rollupOptions: {
+        output: {
+          format: 'cjs',
+          exports: 'named',
+        },
+      },
     },
   })
 }

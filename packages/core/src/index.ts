@@ -1,51 +1,51 @@
-import path from 'node:path'
+import { posix } from 'node:path'
 import type { Plugin } from 'vite'
 import { globSync } from 'fast-glob'
-import { cssFilter, htmlFilter } from './utils'
+import copy from '@guanghechen/rollup-plugin-copy'
+import { cssFilter, jsOrtsFilter } from './utils'
 
 export default function Vmini(): Plugin[] {
+  const files = globSync('src/**/*.**')
+  const copyFiles = files.filter(file => !cssFilter(file) && !jsOrtsFilter(file))
+  const inputFiles = files.filter(file => cssFilter(file) || jsOrtsFilter(file))
+
+  const inputList = Object.fromEntries(inputFiles.map((file) => {
+    const filePath = posix.relative('src', file)
+    return [filePath, file]
+  }))
+
   return [
+    copy({
+      targets: copyFiles.map((file) => {
+        return {
+          src: file,
+          dest: 'dist',
+          rename(name, ext, _srcPath) {
+            return ext === 'html' ? `${name}.wxml` : `${name}.${ext}`
+          },
+        }
+      }),
+      flatten: false,
+    }),
     {
       name: 'vite-plugin-vue-mini',
-      enforce: 'pre',
-      generateBundle(_, outBundle) {
-        for (const bundle of Object.values(outBundle)) {
-          if (
-            bundle.type === 'asset'
-            && htmlFilter(bundle.fileName)
-            && typeof bundle.source === 'string'
-          )
-            bundle.fileName = bundle.fileName.replace(/^src\//, '').replace(/\.html$/, '.wxml')
-        }
-      },
-      config(config) {
+      enforce: 'post',
+      config() {
         return {
           build: {
             rollupOptions: {
-              ...config.build?.rollupOptions,
-              input: config.build?.rollupOptions?.input
-              || Object.fromEntries(
-                globSync('src/**/*.*').map(file => [file, file]),
-              ),
+              input: inputList,
               output: {
-                assetFileNames: (assetInfo) => {
-                  const filePath = path.relative('src', assetInfo.name!)
-
-                  if (cssFilter(assetInfo.name))
-                    return filePath
-                  else
-                    return 'assets/[name][extname]'
+                assetFileNames: () => {
+                  return '[name].wxss'
                 },
-                // entryFileNames: (chunkInfo) => {
-                //   const filePath = path.relative('src', chunkInfo.name)
-                //   return filePath
-                // },
-                // chunkFileNames: (chunkInfo) => {
-                //   const module = chunkInfo.name
-                //   return `miniprogram_npm/${module}/index.js`
-                // },
-                format: 'cjs',
-                exports: 'named',
+                entryFileNames: (chunkInfo) => {
+                  return chunkInfo.name
+                },
+                chunkFileNames: (chunkInfo) => {
+                  const module = chunkInfo.name
+                  return `miniprogram_npm/${module}/index.js`
+                },
               },
             },
           },
