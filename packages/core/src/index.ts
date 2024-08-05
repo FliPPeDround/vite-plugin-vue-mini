@@ -28,7 +28,7 @@ export default function Vmini(): Plugin[] {
           },
         }
       }),
-      // hook: 'writeBundle',
+      hook: 'writeBundle',
     }),
     {
       name: 'vite-plugin-vue-mini',
@@ -36,6 +36,7 @@ export default function Vmini(): Plugin[] {
       config() {
         return {
           build: {
+            emptyOutDir: false,
             rollupOptions: {
               input: inputList,
               output: {

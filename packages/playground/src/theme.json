@@ -10,7 +10,7 @@
   },
   "dark": {
     "style": "white",
-    "color": "#ffffff",
+    "color": "#883333",
     "bgColor": "#181818",
     "homeIcon": "/images/home-dark.png",
     "homeSelectedIcon": "/images/home-dark-selected.png",
