@@ -5,6 +5,7 @@ import { globSync } from 'fast-glob'
 import copy from '@guanghechen/rollup-plugin-copy'
 import { readJSONSync } from 'fs-extra'
 import { cssFilter, jsOrtsFilter } from './utils'
+import { wxSupportFileTypes } from './constants'
 
 function fromEntriesPath(paths: string[]) {
   return Object.fromEntries(paths.map((file) => {
@@ -30,11 +31,13 @@ export default function Vmini(): Plugin[] {
     complier: rootFilesWithComplier,
     copy: rootFilesWithCopy,
   } = categorizeFiles(rootFiles)
+  const assetsFiles = globSync(`src/**/*.{${wxSupportFileTypes.join(',')}}`)
 
   const appJSON = readJSONSync('src/app.json')
   const pages = appJSON.pages as string[]
+  const components = Object.values(appJSON?.usingComponents) as string[]
 
-  const inputList = pages.reduce((acc, page) => {
+  const inputList = [...pages, ...components].reduce((acc, page) => {
     const files = globSync(`src/${page}.**`)
     const {
       complier: enterFiles,
@@ -47,7 +50,7 @@ export default function Vmini(): Plugin[] {
     return acc
   }, {
     enterList: fromEntriesPath(rootFilesWithComplier),
-    copyList: rootFilesWithCopy,
+    copyList: [...rootFilesWithCopy, ...assetsFiles],
   })
 
   return [
@@ -74,7 +77,7 @@ export default function Vmini(): Plugin[] {
               },
               plugins: [
                 copy({
-                  verbose: true,
+                  // verbose: true,
                   targets: inputList.copyList.map((src) => {
                     const dest = dirname(src).replace(/^src/, 'dist')
                     return {

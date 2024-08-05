@@ -5,7 +5,7 @@ export default defineConfig({
   target: 'node14',
   clean: true,
   format: ['esm', 'cjs'],
-  dts: true,
+  // dts: true,
   entry: [
     'src/index.ts',
     'cli/index.ts',

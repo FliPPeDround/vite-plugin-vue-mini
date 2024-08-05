@@ -11,6 +11,7 @@ export async function buildCommand(mode: string) {
         output: {
           format: 'cjs',
           exports: 'named',
+          strict: false,
         },
       },
     },
