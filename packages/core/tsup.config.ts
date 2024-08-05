@@ -10,6 +10,10 @@ export default defineConfig({
     'src/index.ts',
     'cli/index.ts',
   ],
+  esbuildOptions(options) {
+    if (options.format === 'esm')
+      options.outExtension = { '.js': '.mjs' }
+  },
   external: [
     ...Object.keys(peerDependencies),
   ],

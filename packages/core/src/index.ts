@@ -16,6 +16,7 @@ export default function Vmini(): Plugin[] {
 
   return [
     copy({
+      verbose: true,
       targets: copyFiles.map((file) => {
         return {
           src: file,
@@ -26,6 +27,7 @@ export default function Vmini(): Plugin[] {
         }
       }),
       flatten: false,
+      hook: 'writeBundle',
     }),
     {
       name: 'vite-plugin-vue-mini',

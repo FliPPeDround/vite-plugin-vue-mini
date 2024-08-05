@@ -4,20 +4,20 @@
   "version": "1.0.0",
   "description": "",
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "keywords": [],
   "exports": {
     ".": {
       "types": "./dist/src/index.d.ts",
-      "import": "./dist/src/index.js",
+      "import": "./dist/src/index.mjs",
       "require": "./dist/src/index.cjs"
     }
   },
   "main": "./dist/src/index.cjs",
-  "module": "./dist/src/index.js",
+  "module": "./dist/src/index.mjs",
   "types": "./dist/src/index.d.ts",
   "bin": {
-    "vmini": "./dist/cli/index.js"
+    "vmini": "./dist/cli/index.mjs"
   },
   "files": [
     "dist"
@@ -28,8 +28,10 @@
   },
   "peerDependencies": {
     "fast-glob": "^3.3.2",
+    "picocolors": "^1.0.1",
     "vite": "^5.3.5"
   },
+
   "devDependencies": {
     "@guanghechen/rollup-plugin-copy": "6.0.0-alpha.9",
     "@types/fs-extra": "^11.0.4",

@@ -33,6 +33,7 @@
     "build": "unbuild",
     "dev": "cd packages/core && pnpm dev",
     "play": "cd packages/playground && pnpm dev",
+    "play:b": "cd packages/playground && pnpm build",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "prepublishOnly": "nr build",
