@@ -1,44 +1,65 @@
-import { dirname, posix } from 'node:path'
+import { basename, dirname, posix } from 'node:path'
+import { readFileSync } from 'node:fs'
 import type { Plugin } from 'vite'
 import { globSync } from 'fast-glob'
 import copy from '@guanghechen/rollup-plugin-copy'
+import { readJSONSync } from 'fs-extra'
 import { cssFilter, jsOrtsFilter } from './utils'
 
-export default function Vmini(): Plugin[] {
-  const files = globSync('src/**/*.**')
-  const copyFiles = files.filter(file => !cssFilter(file) && !jsOrtsFilter(file))
-  const inputFiles = files.filter(file => cssFilter(file) || jsOrtsFilter(file))
-
-  const inputList = Object.fromEntries(inputFiles.map((file) => {
+function fromEntriesPath(paths: string[]) {
+  return Object.fromEntries(paths.map((file) => {
     const filePath = posix.relative('src', file)
     return [filePath, file]
   }))
+}
+
+function categorizeFiles(files: string[]) {
+  return files.reduce((acc, file) => {
+    if (cssFilter(file) || jsOrtsFilter(file))
+      acc.complier.push(file)
+    else
+      acc.copy.push(file)
+
+    return acc
+  }, { complier: <string[]>[], copy: <string[]>[] })
+}
+
+export default function Vmini(): Plugin[] {
+  const rootFiles = globSync('src/*.**')
+  const {
+    complier: rootFilesWithComplier,
+    copy: rootFilesWithCopy,
+  } = categorizeFiles(rootFiles)
+
+  const appJSON = readJSONSync('src/app.json')
+  const pages = appJSON.pages as string[]
+
+  const inputList = pages.reduce((acc, page) => {
+    const files = globSync(`src/${page}.**`)
+    const {
+      complier: enterFiles,
+      copy: copyFiles,
+    } = categorizeFiles(files)
+
+    acc.copyList.push(...copyFiles)
+    Object.assign(acc.enterList, fromEntriesPath(enterFiles))
+
+    return acc
+  }, {
+    enterList: fromEntriesPath(rootFilesWithComplier),
+    copyList: rootFilesWithCopy,
+  })
 
   return [
-    copy({
-      verbose: true,
-      targets: copyFiles.map((src) => {
-        // 将file去掉src和文件名作为dest路径
-        const dest = dirname(src).replace(/^src/, 'dist')
-        return {
-          src,
-          dest,
-          rename(name, ext, _srcPath) {
-            return ext === 'html' ? `${name}.wxml` : `${name}.${ext}`
-          },
-        }
-      }),
-      hook: 'writeBundle',
-    }),
     {
       name: 'vite-plugin-vue-mini',
       enforce: 'post',
       config() {
         return {
           build: {
-            emptyOutDir: false,
+            // emptyOutDir: false,
             rollupOptions: {
-              input: inputList,
+              input: inputList.enterList,
               output: {
                 assetFileNames: () => {
                   return '[name].wxss'
@@ -51,6 +72,22 @@ export default function Vmini(): Plugin[] {
                   return `miniprogram_npm/${module}/index.js`
                 },
               },
+              plugins: [
+                copy({
+                  verbose: true,
+                  targets: inputList.copyList.map((src) => {
+                    const dest = dirname(src).replace(/^src/, 'dist')
+                    return {
+                      src,
+                      dest,
+                      rename(name, ext, _srcPath) {
+                        return ext === 'html' ? `${name}.wxml` : `${name}.${ext}`
+                      },
+                    }
+                  }),
+                  hook: 'writeBundle',
+                }),
+              ],
             },
           },
         }
