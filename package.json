@@ -31,9 +31,9 @@
   ],
   "scripts": {
     "build": "unbuild",
-    "dev": "cd packages/core && pnpm dev",
-    "play": "cd packages/playground && pnpm dev",
-    "play:b": "cd packages/playground && pnpm build",
+    "dev": "nr -C packages/core dev",
+    "play": "nr -C packages/playground dev",
+    "play:b": "nr -C packages/playground build",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "prepublishOnly": "nr build",

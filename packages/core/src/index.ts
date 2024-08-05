@@ -1,4 +1,4 @@
-import { posix } from 'node:path'
+import { dirname, posix } from 'node:path'
 import type { Plugin } from 'vite'
 import { globSync } from 'fast-glob'
 import copy from '@guanghechen/rollup-plugin-copy'
@@ -17,17 +17,18 @@ export default function Vmini(): Plugin[] {
   return [
     copy({
       verbose: true,
-      targets: copyFiles.map((file) => {
+      targets: copyFiles.map((src) => {
+        // 将file去掉src和文件名作为dest路径
+        const dest = dirname(src).replace(/^src/, 'dist')
         return {
-          src: file,
-          dest: 'dist',
+          src,
+          dest,
           rename(name, ext, _srcPath) {
             return ext === 'html' ? `${name}.wxml` : `${name}.${ext}`
           },
         }
       }),
-      flatten: false,
-      hook: 'writeBundle',
+      // hook: 'writeBundle',
     }),
     {
       name: 'vite-plugin-vue-mini',
