@@ -1,66 +1,28 @@
-import { basename, dirname, posix } from 'node:path'
-import { readFileSync } from 'node:fs'
+import { dirname } from 'node:path'
 import type { Plugin } from 'vite'
-import { globSync } from 'fast-glob'
 import copy from '@guanghechen/rollup-plugin-copy'
-import { readJSONSync } from 'fs-extra'
-import { cssFilter, jsOrtsFilter } from './utils'
-import { wxSupportFileTypes } from './constants'
-
-function fromEntriesPath(paths: string[]) {
-  return Object.fromEntries(paths.map((file) => {
-    const filePath = posix.relative('src', file)
-    return [filePath, file]
-  }))
-}
-
-function categorizeFiles(files: string[]) {
-  return files.reduce((acc, file) => {
-    if (cssFilter(file) || jsOrtsFilter(file))
-      acc.complier.push(file)
-    else
-      acc.copy.push(file)
-
-    return acc
-  }, { complier: <string[]>[], copy: <string[]>[] })
-}
+import { scanInputFiles } from './scanInputFiles'
+import { cssFilter } from './utils'
 
 export default function Vmini(): Plugin[] {
-  const rootFiles = globSync('src/*.**')
-  const {
-    complier: rootFilesWithComplier,
-    copy: rootFilesWithCopy,
-  } = categorizeFiles(rootFiles)
-  const assetsFiles = globSync(`src/**/*.{${wxSupportFileTypes.join(',')}}`)
-
-  const appJSON = readJSONSync('src/app.json')
-  const pages = appJSON.pages as string[]
-  const components = Object.values(appJSON?.usingComponents) as string[]
-
-  const inputList = [...pages, ...components].reduce((acc, page) => {
-    const files = globSync(`src/${page}.**`)
-    const {
-      complier: enterFiles,
-      copy: copyFiles,
-    } = categorizeFiles(files)
-
-    acc.copyList.push(...copyFiles)
-    Object.assign(acc.enterList, fromEntriesPath(enterFiles))
-
-    return acc
-  }, {
-    enterList: fromEntriesPath(rootFilesWithComplier),
-    copyList: [...rootFilesWithCopy, ...assetsFiles],
-  })
-
+  const inputList = scanInputFiles()
+  // console.log(inputList)
   return [
     {
       name: 'vite-plugin-vue-mini',
       enforce: 'post',
+      transform(code, id) {
+        if (cssFilter(id)) {
+          return {
+            code: `/* ${id} */ ${code}`,
+            map: null,
+          }
+        }
+      },
       config() {
         return {
           build: {
-            // emptyOutDir: false,
+            emptyOutDir: false,
             rollupOptions: {
               input: inputList.enterList,
               output: {

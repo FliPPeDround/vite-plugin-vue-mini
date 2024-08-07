@@ -6,7 +6,7 @@
     "pages/mine/index"
   ],
   "usingComponents": {
-    "us-button": "components/tButton/index"
+    "us-button": "/components/tButton/index"
   },
   "window": {
     "navigationBarBackgroundColor": "@bgColor",

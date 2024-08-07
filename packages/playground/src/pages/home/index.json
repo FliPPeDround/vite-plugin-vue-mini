@@ -1,3 +1,6 @@
 {
-  "usingComponents": {}
+  "usingComponents": {
+    "us-button": "/components/tButton/index",
+    "us-input": "/components/tInput/index"
+  }
 }
