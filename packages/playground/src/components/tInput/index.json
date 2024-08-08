@@ -1,6 +1,6 @@
 {
   "component": true,
   "usingComponents": {
-    "us-icon": "/components/tIcon/index"
+    "us-icon": "./../tIcon/index"
   }
 }

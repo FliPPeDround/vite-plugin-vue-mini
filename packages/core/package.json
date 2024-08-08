@@ -31,7 +31,9 @@
     "picocolors": "^1.0.1",
     "vite": "^5.3.5"
   },
-
+  "dependencies": {
+    "local-pkg": "^0.5.0"
+  },
   "devDependencies": {
     "@guanghechen/rollup-plugin-copy": "6.0.0-alpha.9",
     "@types/fs-extra": "^11.0.4",
