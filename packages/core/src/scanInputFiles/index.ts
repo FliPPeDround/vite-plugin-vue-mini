@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
-import { basename, dirname, isAbsolute, join, posix, resolve, sep } from 'node:path'
+import { basename, dirname, isAbsolute, join, parse, posix, relative, resolve, sep } from 'node:path'
+import process from 'node:process'
 import { globSync } from 'fast-glob'
 import { copySync, pathExistsSync, readJSONSync } from 'fs-extra'
 import {
@@ -22,6 +23,7 @@ interface ScanResult {
 function fromEntriesPath(paths: string[]): Record<string, string> {
   return Object.fromEntries(paths.map((file) => {
     const filePath = posix.relative('src', file)
+
     return [filePath, file]
   }))
 }
@@ -37,11 +39,38 @@ function categorizeFiles(files: string[]): FileCategories {
   }, { compiler: [], copy: [] })
 }
 
+// function getRelativePath(pathStr: string) {
+//   const parts = pathStr.split(sep)
+//   return parts.slice(1).join(sep)
+// }
+
+function getRootDirectory(pathStr: string) {
+  const parts = pathStr.split(sep)
+  return parts[0]
+}
+
 function readComponents(jsonFilePath: string): string[] {
   try {
     const jsonContent = readJSONSync(jsonFilePath)
-    return (Object.values(jsonContent?.usingComponents || {}) as string[]).map((component) => {
-      return isAbsolute(component) ? component : posix.relative('src', resolve(dirname(jsonFilePath), component))
+    const usingComponents = Object.values(jsonContent?.usingComponents || {}) as string[]
+    return usingComponents.map((component) => {
+      const path = isAbsolute(component)
+        ? resolve(process.cwd(), 'src', `./${component}`)
+        : resolve(dirname(jsonFilePath), component)
+      if (pathExistsSync(`${path}.json`)) {
+        return path
+      }
+      else {
+        const pkgName = getRootDirectory(component)
+        // TODO 全量复制有点呆，但管用
+        if (isPackageExists(pkgName)) {
+          const { packageJson, rootPath } = getPackageInfoSync(pkgName)!
+          const source = join(rootPath, packageJson.miniprogram || 'miniprogram_dist')
+          const destination = resolve('dist', 'miniprogram_npm', pkgName)
+          copySync(source, destination)
+        }
+        return component
+      }
     })
   }
   catch (error) {
@@ -50,43 +79,19 @@ function readComponents(jsonFilePath: string): string[] {
   }
 }
 
-function getRootDirectory(pathStr: string) {
-  const parts = pathStr.split(sep)
-  return parts[0]
-}
-
-// function getRelativePath(pathStr: string) {
-//   const parts = pathStr.split(sep)
-//   return parts.slice(1).join(sep)
-// }
-
 function scanFilesRecursively(entry: string, visited: Set<string>): ScanResult {
-  const entryPath = join('src', `${entry}.json`)
-  console.log('entryPath', entryPath)
-  // TODO 全量复制，不是一个好办法
-  // TODO 需解决usingComponents相对和绝对的转换
-  if (!pathExistsSync(entryPath)) {
-    const pkgName = getRootDirectory(entry)
-    if (isPackageExists(pkgName)) {
-      const { packageJson, rootPath } = getPackageInfoSync(pkgName)!
-      const source = join(rootPath, packageJson.miniprogram || 'miniprogram_dist')
-      const destination = resolve('dist', 'miniprogram_npm', pkgName)
-      copySync(source, destination)
-    }
-    return { enterList: {}, copyList: [] }
-  }
-
-  if (visited.has(entryPath))
+  if (visited.has(entry))
     return { enterList: {}, copyList: [] }
 
-  visited.add(entryPath)
+  visited.add(entry)
+  const files = globSync(`${entry}.**`, { absolute: true })
 
-  const files = globSync(`src/${entry}.**`)
-  console.log(files)
   const { compiler: enterFiles, copy: copyFiles } = categorizeFiles(files)
+  const entryPath = copyFiles.find(file => file.endsWith(`${entry}.json`))!
 
+  if (!entryPath)
+    return { enterList: {}, copyList: [] }
   const components = readComponents(entryPath)
-  console.log('components', components)
   const result = components.reduce<ScanResult>((acc, component) => {
     const componentResult = scanFilesRecursively(component, visited)
     acc.copyList.push(...componentResult.copyList)
@@ -101,12 +106,18 @@ function scanFilesRecursively(entry: string, visited: Set<string>): ScanResult {
 }
 
 export function scanInputFiles(): ScanResult {
+  console.log(parse(process.cwd()).root)
   const appJSON = readJSONSync('src/app.json')
   const pages = appJSON.pages as string[]
   const components = Object.values(appJSON?.usingComponents || {}) as string[]
   const visited = new Set<string>()
+  const entries = [...pages, ...components].map((page) => {
+    const cwd = process.cwd()
+    return join(cwd, 'src', page)
+  })
+  // console.log('entries', entries)
 
-  const inputList = [...pages, ...components].reduce<ScanResult>((acc, page) => {
+  const inputList = entries.reduce<ScanResult>((acc, page) => {
     const pageResult = scanFilesRecursively(page, visited)
     acc.copyList.push(...pageResult.copyList)
     Object.assign(acc.enterList, pageResult.enterList)
@@ -116,11 +127,11 @@ export function scanInputFiles(): ScanResult {
     copyList: [],
   })
 
-  const rootFiles = globSync('src/*.**')
+  const rootFiles = globSync('src/*.**', { absolute: true })
   const { compiler: rootFilesWithCompiler, copy: rootFilesWithCopy } = categorizeFiles(rootFiles)
   Object.assign(inputList.enterList, fromEntriesPath(rootFilesWithCompiler))
-  const assetsFiles = globSync(`src/**/*.{${wxSupportFileTypes.join(',')}}`)
+  const assetsFiles = globSync(`src/**/*.{${wxSupportFileTypes.join(',')}}`, { absolute: true })
   inputList.copyList.push(...rootFilesWithCopy, ...assetsFiles)
-
+  // console.log('inputList', inputList)
   return inputList
 }

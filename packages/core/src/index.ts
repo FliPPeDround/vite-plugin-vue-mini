@@ -1,4 +1,5 @@
-import { dirname } from 'node:path'
+import { dirname, relative } from 'node:path'
+import process from 'node:process'
 import type { Plugin } from 'vite'
 import copy from '@guanghechen/rollup-plugin-copy'
 import { scanInputFiles } from './scanInputFiles'
@@ -30,7 +31,8 @@ export default function Vmini(): Plugin[] {
                   return '[name].wxss'
                 },
                 entryFileNames: (chunkInfo) => {
-                  return chunkInfo.name
+                  const module = chunkInfo.name
+                  return module
                 },
                 chunkFileNames: (chunkInfo) => {
                   const module = chunkInfo.name
@@ -39,9 +41,10 @@ export default function Vmini(): Plugin[] {
               },
               plugins: [
                 copy({
-                  // verbose: true,
+                  verbose: true,
                   targets: inputList.copyList.map((src) => {
-                    const dest = dirname(src).replace(/^src/, 'dist')
+                    const relativePath = relative(process.cwd(), src)
+                    const dest = dirname(relativePath).replace(/^src/, 'dist')
                     return {
                       src,
                       dest,

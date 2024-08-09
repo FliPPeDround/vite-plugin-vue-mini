@@ -7,7 +7,7 @@
   "keywords": [],
   "main": "index.js",
   "scripts": {
-    "dev": "vmini dev",
+    "dev": "clear && nodemon -w '../core/src/**/*.ts' -e .ts -x vmini dev",
     "build": "vmini build"
   },
   "dependencies": {
