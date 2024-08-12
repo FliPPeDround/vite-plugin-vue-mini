@@ -8,7 +8,8 @@
   "keywords": [],
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon -w '../core/src/**/*.ts' -e .ts -x vmini dev",
+    "dev:watch": "nodemon -w '../core/src/**/*.ts' -e .ts -x vmini dev",
+    "dev": "vmini dev",
     "build": "vmini build"
   },
   "dependencies": {

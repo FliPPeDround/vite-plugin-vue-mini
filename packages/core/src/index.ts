@@ -1,5 +1,5 @@
-import { dirname, relative } from 'node:path'
 import process from 'node:process'
+import { dirname, relative } from 'pathe'
 import type { Plugin } from 'vite'
 import copy from '@guanghechen/rollup-plugin-copy'
 import { scanInputFiles } from './scanInputFiles'
@@ -41,7 +41,7 @@ export default function Vmini(): Plugin[] {
               },
               plugins: [
                 copy({
-                  // verbose: true,
+                  verbose: true,
                   targets: inputList.copyList.map((src) => {
                     const relativePath = relative(process.cwd(), src)
                     const dest = dirname(relativePath).replace(/^src/, 'dist')
