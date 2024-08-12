@@ -59,6 +59,9 @@ importers:
 
   packages/core:
     dependencies:
+      chokidar:
+        specifier: ^3.6.0
+        version: 3.6.0
       fast-glob:
         specifier: ^3.3.2
         version: 3.3.2

@@ -4,7 +4,7 @@ import process from 'node:process'
 import cac from 'cac'
 import c from 'picocolors'
 import { version } from '../package.json'
-import { buildCommand } from './commands/build'
+import { buildCommand, watchCommand } from './commands/build'
 
 const cli = cac('vmini')
 
@@ -14,7 +14,7 @@ cli
 
 cli
   .command('dev')
-  .action(() => buildCommand('development'))
+  .action(watchCommand)
 
 cli
   .command('build')

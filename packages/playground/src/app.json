@@ -29,7 +29,7 @@
         "selectedIconPath": "@homeSelectedIcon"
       },
       {
-        "text": "我",
+        "text": "我2c",
         "pagePath": "pages/mine/index",
         "iconPath": "@mineIcon",
         "selectedIconPath": "@mineSelectedIcon"

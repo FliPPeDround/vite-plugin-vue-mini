@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import process from 'node:process'
-import { dirname, isAbsolute, join, parse, relative, resolve, sep } from 'pathe'
+import { dirname, isAbsolute, join, relative, resolve, sep } from 'pathe'
 import { globSync } from 'fast-glob'
 import { copySync, pathExistsSync, readJSONSync } from 'fs-extra'
 import {

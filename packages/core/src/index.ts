@@ -1,7 +1,4 @@
-import process from 'node:process'
-import { dirname, relative } from 'pathe'
 import type { Plugin } from 'vite'
-import copy from '@guanghechen/rollup-plugin-copy'
 import { scanInputFiles } from './scanInputFiles'
 import { cssFilter } from './utils'
 
@@ -9,6 +6,22 @@ export default function Vmini(): Plugin[] {
   const inputList = scanInputFiles()
   // console.log(inputList)
   return [
+    // copy({
+    //   verbose: true,
+    //   targets: inputList.copyList.map((src) => {
+    //     console.log('src', src)
+    //     const relativePath = relative(process.cwd(), src)
+    //     const dest = dirname(relativePath).replace(/^src/, 'dist')
+    //     return {
+    //       src,
+    //       dest,
+    //       rename(name, ext, _srcPath) {
+    //         return ext === 'html' ? `${name}.wxml` : `${name}.${ext}`
+    //       },
+    //     }
+    //   }),
+    //   hook: 'writeBundle',
+    // }),
     {
       name: 'vite-plugin-vue-mini',
       enforce: 'post',
@@ -39,23 +52,6 @@ export default function Vmini(): Plugin[] {
                   return `miniprogram_npm/${module}/index.js`
                 },
               },
-              plugins: [
-                copy({
-                  verbose: true,
-                  targets: inputList.copyList.map((src) => {
-                    const relativePath = relative(process.cwd(), src)
-                    const dest = dirname(relativePath).replace(/^src/, 'dist')
-                    return {
-                      src,
-                      dest,
-                      rename(name, ext, _srcPath) {
-                        return ext === 'html' ? `${name}.wxml` : `${name}.${ext}`
-                      },
-                    }
-                  }),
-                  hook: 'writeBundle',
-                }),
-              ],
             },
           },
         }
