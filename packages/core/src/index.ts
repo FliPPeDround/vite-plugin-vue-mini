@@ -41,7 +41,7 @@ export default function Vmini(): Plugin[] {
               },
               plugins: [
                 copy({
-                  verbose: true,
+                  // verbose: true,
                   targets: inputList.copyList.map((src) => {
                     const relativePath = relative(process.cwd(), src)
                     const dest = dirname(relativePath).replace(/^src/, 'dist')

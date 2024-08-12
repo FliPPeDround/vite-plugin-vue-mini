@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { basename, dirname, isAbsolute, join, parse, posix, relative, resolve, sep } from 'node:path'
+import { dirname, isAbsolute, join, parse, posix, relative, resolve, sep } from 'node:path'
 import process from 'node:process'
 import { globSync } from 'fast-glob'
 import { copySync, pathExistsSync, readJSONSync } from 'fs-extra'
@@ -38,11 +38,6 @@ function categorizeFiles(files: string[]): FileCategories {
     return acc
   }, { compiler: [], copy: [] })
 }
-
-// function getRelativePath(pathStr: string) {
-//   const parts = pathStr.split(sep)
-//   return parts.slice(1).join(sep)
-// }
 
 function getRootDirectory(pathStr: string) {
   const parts = pathStr.split(sep)
@@ -132,6 +127,15 @@ export function scanInputFiles(): ScanResult {
   Object.assign(inputList.enterList, fromEntriesPath(rootFilesWithCompiler))
   const assetsFiles = globSync(`src/**/*.{${wxSupportFileTypes.join(',')}}`, { absolute: true })
   inputList.copyList.push(...rootFilesWithCopy, ...assetsFiles)
-  // console.log('inputList', inputList)
+  console.log(inputList)
+
+  // inputList.copyList = inputList.copyList.map((path) => {
+  //   const relativePath = relative(process.cwd(), path)
+  //   return relativePath
+  // })
+  // inputList.enterList = Object.fromEntries(Object.entries(inputList.enterList).map(([key, value]) => {
+  //   const relativePath = relative(process.cwd(), value)
+  //   return [key, relativePath]
+  // }))
   return inputList
 }
