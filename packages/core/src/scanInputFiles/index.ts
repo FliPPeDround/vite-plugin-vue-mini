@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
-import { dirname, isAbsolute, join, parse, posix, relative, resolve, sep } from 'node:path'
 import process from 'node:process'
+import { dirname, isAbsolute, join, parse, relative, resolve, sep } from 'pathe'
 import { globSync } from 'fast-glob'
 import { copySync, pathExistsSync, readJSONSync } from 'fs-extra'
 import {
@@ -22,7 +22,7 @@ interface ScanResult {
 
 function fromEntriesPath(paths: string[]): Record<string, string> {
   return Object.fromEntries(paths.map((file) => {
-    const filePath = posix.relative('src', file)
+    const filePath = relative('src', file)
 
     return [filePath, file]
   }))
@@ -101,13 +101,12 @@ function scanFilesRecursively(entry: string, visited: Set<string>): ScanResult {
 }
 
 export function scanInputFiles(): ScanResult {
-  console.log(parse(process.cwd()).root)
   const appJSON = readJSONSync('src/app.json')
   const pages = appJSON.pages as string[]
   const components = Object.values(appJSON?.usingComponents || {}) as string[]
   const visited = new Set<string>()
+  const cwd = process.cwd()
   const entries = [...pages, ...components].map((page) => {
-    const cwd = process.cwd()
     return join(cwd, 'src', page)
   })
   // console.log('entries', entries)
