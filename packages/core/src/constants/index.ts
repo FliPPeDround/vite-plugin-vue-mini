@@ -1,5 +1,7 @@
 /** 微信支持的文件格式 */
 export const wxSupportFileTypes = [
+  'wxml',
+  'wxss',
   'wxs',
   'png',
   'jpg',

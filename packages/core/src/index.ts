@@ -1,4 +1,7 @@
+import process from 'node:process'
 import type { Plugin } from 'vite'
+import { viteStaticCopy } from 'vite-plugin-static-copy'
+import { dirname, join, relative } from 'pathe'
 import { scanInputFiles } from './scanInputFiles'
 import { cssFilter } from './utils'
 
@@ -6,22 +9,22 @@ export default function Vmini(): Plugin[] {
   const inputList = scanInputFiles()
   // console.log(inputList)
   return [
-    // copy({
-    //   verbose: true,
-    //   targets: inputList.copyList.map((src) => {
-    //     console.log('src', src)
-    //     const relativePath = relative(process.cwd(), src)
-    //     const dest = dirname(relativePath).replace(/^src/, 'dist')
-    //     return {
-    //       src,
-    //       dest,
-    //       rename(name, ext, _srcPath) {
-    //         return ext === 'html' ? `${name}.wxml` : `${name}.${ext}`
-    //       },
-    //     }
-    //   }),
-    //   hook: 'writeBundle',
-    // }),
+    viteStaticCopy({
+      targets: inputList.copyList.map((src) => {
+        const relativePath = relative(process.cwd(), src)
+        const dest = join(
+          dirname(relativePath).replace(/^src[/\\]?/, ''),
+          '',
+        )
+        return {
+          src,
+          dest,
+          rename(name, ext, _srcPath) {
+            return ext === 'html' ? `${name}.wxml` : `${name}.${ext}`
+          },
+        }
+      }),
+    }) as unknown as Plugin,
     {
       name: 'vite-plugin-vue-mini',
       enforce: 'post',

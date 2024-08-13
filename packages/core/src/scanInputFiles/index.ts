@@ -1,12 +1,8 @@
-/* eslint-disable no-console */
 import process from 'node:process'
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'pathe'
 import { globSync } from 'fast-glob'
 import { copySync, pathExistsSync, readJSONSync } from 'fs-extra'
-import {
-  getPackageInfoSync,
-  isPackageExists,
-} from 'local-pkg'
+import { getPackageInfoSync, isPackageExists } from 'local-pkg'
 import { cssFilter, jsOrtsFilter } from './../utils'
 import { wxSupportFileTypes } from './../constants'
 
@@ -40,8 +36,7 @@ function categorizeFiles(files: string[]): FileCategories {
 }
 
 function getRootDirectory(pathStr: string) {
-  const parts = pathStr.split(sep)
-  return parts[0]
+  return pathStr.split(sep)[0]
 }
 
 function readComponents(jsonFilePath: string): string[] {
@@ -109,7 +104,6 @@ export function scanInputFiles(): ScanResult {
   const entries = [...pages, ...components].map((page) => {
     return join(cwd, 'src', page)
   })
-  // console.log('entries', entries)
 
   const inputList = entries.reduce<ScanResult>((acc, page) => {
     const pageResult = scanFilesRecursively(page, visited)
@@ -126,15 +120,6 @@ export function scanInputFiles(): ScanResult {
   Object.assign(inputList.enterList, fromEntriesPath(rootFilesWithCompiler))
   const assetsFiles = globSync(`src/**/*.{${wxSupportFileTypes.join(',')}}`, { absolute: true })
   inputList.copyList.push(...rootFilesWithCopy, ...assetsFiles)
-  console.log(inputList)
 
-  // inputList.copyList = inputList.copyList.map((path) => {
-  //   const relativePath = relative(process.cwd(), path)
-  //   return relativePath
-  // })
-  // inputList.enterList = Object.fromEntries(Object.entries(inputList.enterList).map(([key, value]) => {
-  //   const relativePath = relative(process.cwd(), value)
-  //   return [key, relativePath]
-  // }))
   return inputList
 }
